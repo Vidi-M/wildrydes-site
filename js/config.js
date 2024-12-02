@@ -3,8 +3,8 @@ require('dotenv').config();
 
 window._config = {
     cognito: {
-        userPoolId: 'eu-north-1_obVFpPvmz', // e.g. us-east-2_uXboG5pAb
-        userPoolClientId: '4b44bc3fsfh7vg055bje2i345v', // e.g. 25ddkmj4v6hfsfvruhpfi7n4hv
+        userPoolId: 'eu-north-1_ZS8ShuBVW', // e.g. us-east-2_uXboG5pAb
+        userPoolClientId: '5q9vvbhm17mq2uejtn4v4u2c2j', // e.g. 25ddkmj4v6hfsfvruhpfi7n4hv
         userPoolClientSecret: process.env.COGNITO_CLIENT_SECRET,
         region: 'eu-north-1' // e.g. us-east-2
     },
