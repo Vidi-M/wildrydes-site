@@ -14,7 +14,8 @@ var WildRydes = window.WildRydes || {};
 
     if (!(_config.cognito.userPoolId &&
           _config.cognito.userPoolClientId &&
-          _config.cognito.region)) {
+          _config.cognito.region &&
+          _config.cognito.userPoolClientSecret)) {
         $('#noCognitoMessage').show();
         return;
     }
@@ -47,10 +48,17 @@ var WildRydes = window.WildRydes || {};
         }
     });
 
-
     /*
      * Cognito User Pool functions
      */
+
+    // Function to compute the SECRET_HASH
+    function computeSecretHash(username, clientId, clientSecret) {
+        var crypto = require('crypto'); // Use browser-friendly crypto library or similar for frontend
+        return crypto.createHmac('SHA256', clientSecret)
+            .update(username + clientId)
+            .digest('base64');
+    }
 
     function register(email, password, onSuccess, onFailure) {
         var dataEmail = {
@@ -59,7 +67,10 @@ var WildRydes = window.WildRydes || {};
         };
         var attributeEmail = new AmazonCognitoIdentity.CognitoUserAttribute(dataEmail);
 
-        userPool.signUp(toUsername(email), password, [attributeEmail], null,
+        // Compute the SECRET_HASH for the client secret
+        var secretHash = computeSecretHash(toUsername(email), _config.cognito.userPoolClientId, _config.cognito.userPoolClientSecret);
+
+        userPool.signUp(toUsername(email), password, [attributeEmail], { SecretHash: secretHash },
             function signUpCallback(err, result) {
                 if (!err) {
                     onSuccess(result);
@@ -71,9 +82,13 @@ var WildRydes = window.WildRydes || {};
     }
 
     function signin(email, password, onSuccess, onFailure) {
+        // Compute the SECRET_HASH for the client secret
+        var secretHash = computeSecretHash(toUsername(email), _config.cognito.userPoolClientId, _config.cognito.userPoolClientSecret);
+
         var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails({
             Username: toUsername(email),
-            Password: password
+            Password: password,
+            SecretHash: secretHash
         });
 
         var cognitoUser = createCognitoUser(email);
